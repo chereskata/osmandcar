@@ -26,4 +26,4 @@ The map style is WIP and should incorporate all traffic related stuff. Only when
 <br>
 
 ## How to install:
-* Download the Car.render.xml and open it with OSMAnd
+* Download the [Car.render.xml](https://github.com/chereskata/osmandcar/raw/main/Car.render.xml) and open it with OSMAnd
