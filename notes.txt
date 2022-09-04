@@ -1,0 +1,122 @@
+### instructions and basic logic of evaluation
+<switch> checks inner children first and if inside something matches (returns true) all declared, yet unknown variables are saved to the matched object
+<case> checks itself and if 
+<apply> saves all data to the matched object, only executed when one case matches
+<apply_if> checks all known datapoints and interprets unknown datapoints as values to be saved, (??? only executed when one case matches)
+
+
+### examples and pitfalls
+
+## parser ignores any subsequent non apply blocks, after first <apply> is read
+
+## parser ignores subsequent <case> on first match
+this will not work as expected, to set the tunnel road color to blue in night-mode,
+because <case> can not match OSM data key-value pairs multiple times for the identical key="value" pair.
+That means if a <case> returned / evaluated with "true" for a given collection of evaluatable keys,
+the parser traverses all <switch> and <case> subblocks to remove any further <case> 
+that at least contains the same keys (can be indirect, inherited by parent):
+
+<case additional="tunnel=yes" attrColorValue="#FF0000"/>                  <!-- so evaluated kv pairs are: a={additional="tunnel=yes"} -->
+<case nightMode="true" attrColorValue="#00FF00">
+  <case additional="tunnel=yes" minzoom="15" attrColorValue="#0000FF"/>   <!-- evaluated kv pairs would be (incl. implicit ones): b={nightMode="true", minzoom="15" additional="tunnel=yes"} -->
+</case>                                                                   <!-- so b is a superset of a and so the second <case> is autoremoved by the parser -->
+
+
+# solution:
+* you can define the concretest value first (cumbersome, not preferred)
+* you can use <apply_if> on the second case, see below. That leads to the
+  parser skipping the <apply_if> block:
+
+  <case additional="tunnel=yes" attrColorValue="#FF0000"/>                  <!-- so evaluated kv pairs are: a={additional="tunnel=yes"} -->
+  <apply_if nightMode="true" attrColorValue="#00FF00">
+    <case additional="tunnel=yes" minzoom="15" attrColorValue="#0000FF"/>   <!-- skipped by the parser for search of supersets -->
+  </apply_if>
+
+  note: if there was a nested or multiple <case> structure inside <apply_if> the same problem applies again
+
+
+
+
+## cleaner code style
+* Use  <case> and <switch> sparingly and only for checking the state of rendering and OSM data points.
+  Use <apply_if> if possible instead (could not be a performance hit, because no expressions have to be pre-evaluated and therefore searched)
+  This results in more LOC, but the configuration is more readable and therefore maintainable (just my 2ct)
+
+  Before:
+  
+  <case additional="tunnel=yes" attrColorValue="#FF0000"/>                  
+  <apply_if nightMode="true" attrColorValue="#00FF00">
+    <case minzoom="15" additional="tunnel=yes" attrColorValue="#0000FF"/>   
+  </apply_if>
+  
+  After:
+  <apply_if additional="tunnel=yes" attrColorValue="#FF0000"/>
+
+  <apply_if nightMode="true" attrColorValue="#00FF00">
+    <!-- nightMode is enabled -->
+    <apply_if additional="tunnel=yes" minzoom="15" attrColorValue="#0000FF"/> <!-- only on nightMode with zoom > 14 and the road beeing a tunnel -->
+  </apply_if>
+
+
+* The key="value" pairs of the modified addtional rendering information, like attrColorValue, should come at the end of the kv pair enumeration
+
+  order (left to right): OSM data --- map / program state --- values to be set
+
+  Example:
+
+  <apply_if additional="tunnel=yes" minzoom="15" attrColorValue="#0000FF"/>
+                     /\                 /\                     /\
+                     ||                 ||                     ||
+                  OSM data        program state          value to be set
+
+                  
+* For simple declarations <renderingConstant> block
+
+
+
+### fields that get evaluated and are not ignored by <case> if seen multiple times (user interface / app state) - not alterable
+minzoom
+maxzoom
+nightMode
+
+### fields that get <case> evaluated just once and are completely ignored afterwards (OSM data) - not alterable
+additional
+tag
+value
+layer (in <apply>)
+(LOOK AT OSM WIKI)
+
+### fields that get written to on match (additional rendering information) - alterable <- to be set by rules
+attrColorValue
+order (in <apply>)  
+ignorePolygonAsPointArea="true" (in <apply>)
+textColor
+textShield
+textHaloColor
+textHaloRadius
+textHaloRadius
+textWrapWidth
+textMinDistance
+textOrder
+cap cap_0
+color
+color_0
+color_1
+color_2
+color_5
+strokeWidth
+strokeWidth_0
+strokeWidth_2
+strokeWidth_5
+shadowRadius
+shadwoColor
+pathEffect_2
+pathEffect_5
+iconOrder
+disable (not working in <order>)
+iconOrder
+iconVisibleSize
+intersectionSizeFactor
+icon_2
+icon
+cap (???)

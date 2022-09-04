@@ -1,0 +1,8 @@
+amenity place_of_worship, icon > 17
+tree, icon disabled
+amenity bus_station, icon > 18
+highway bus_stop, icon > 18
+public_transport platform > 18
+
+leisure park, text > 18
+power plant, text > 18
