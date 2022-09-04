@@ -20,7 +20,7 @@ The map style is WIP and should incorporate all traffic related stuff. Only when
 
 ## Aim for the future:
 * Improve rendering speed, by finishing the cleanup of Car.render.xml (as it is derrived from default.render.xml), because it's code is a mess and hugely uncommented with a lot of branches
-* Route line is displayed in solid color over every POI or traffic sign (OSMAnd issue, that will probably not be fixed) <br>
+* Route line is displayed in solid color over every POI or traffic sign (OSMAnd issue, fixed in 4.3) <br>
   It could alternatively be translucent and dotted, but this also does not work. A bug report has been filed.
   
 <br>
